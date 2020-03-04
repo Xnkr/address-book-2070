@@ -24,42 +24,13 @@ if not logger.handlers:
     handler.setFormatter(f_format)
     logger.addHandler(handler)
 
+class StandardResponses:
+    SUCCESS_NO_RESPONSE = 204
+    CREATED = 201
+    SUCCESS_CODE = 200
+    BAD_REQUEST_CODE = 400
+    INVALID_CSV = {'Error': 'Invalid CSV'}
+    NOT_FOUND_CODE = 404
+    SERVER_ERROR_CODE = 500
+    SERVER_ERROR = {'Error': 'Server Error occurred'}
 
-class Contact:
-    table = 'CONTACT'
-    contact_id = 'contact_id'
-    fname = 'fname'
-    lname = 'lname'
-    mname = 'mname'
-    columns = (contact_id, fname, mname, lname)
-
-    @staticmethod
-    def create_table_query():
-        return """CREATE TABLE IF NOT EXISTS CONTACT (
-                                    contact_id int primary key, 
-                                    fname text not null, 
-                                    mname text, 
-                                    lname not null);"""
-
-class Address:
-    table = 'ADDRESS'
-    address_id = 'address_id'
-    contact_id = 'contact_id'
-    address_type = 'address_type'
-    address = 'address'
-    city = 'city'
-    state = 'state'
-    zip = 'zip'
-
-    @staticmethod
-    def create_table_query():
-        return """CREATE TABLE IF NOT EXISTS ADDRESS (
-                                           address_id int primary key, 
-                                           contact_id int, 
-                                           address_type text, 
-                                           address text, 
-                                           city text,
-                                           state text,
-                                           zip int,
-                                           FOREIGN KEY (contact_id),
-                                           REFERENCES CONTACT(contact_id));"""

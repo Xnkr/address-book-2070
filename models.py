@@ -31,6 +31,17 @@ class Address(Base):
         return f"<Address({self.address_id} | {self.contact_id} | {self.address_type} | {self.address} " \
                f"| {self.city} | {self.state} | {self.zip})>"
 
+    def as_dict(self):
+        data = {
+            'address_id': self.address_id,
+            'address_type': self.address_type,
+            'address': self.address,
+            'city': self.city,
+            'state': self.state,
+            'zip': self.zip
+        }
+        return data
+
 
 class Phone(Base):
     __tablename__ = 'PHONE'
@@ -43,6 +54,15 @@ class Phone(Base):
     def __repr__(self):
         return f"<Phone({self.phone_id} | {self.contact_id} | {self.phone_type} | {self.area} | {self.number})>"
 
+    def as_dict(self):
+        data = {
+            'phone_id': self.phone_id,
+            'phone_type': self.phone_type,
+            'area': self.area,
+            'number': self.number
+        }
+        return data
+
 
 class Date(Base):
     __tablename__ = "DATE"
@@ -54,19 +74,22 @@ class Date(Base):
     def __repr__(self):
         return f"<Date({self.date_id} | {self.contact_id} | {self.date_type} | {self.date})>"
 
+    def as_dict(self):
+        data = {
+            'date_id': self.date_id,
+            'date_type': self.date_type,
+            'date': self.date
+        }
+        return data
 
-class ContactSchema:
 
-    select_columns = (Contact.fname, Contact.lname, Contact.mname,
-                      Address.address_type, Address.address, Address.city, Address.state, Address.zip,
-                      Phone.phone_type, Phone.area, Phone.number,
-                      Date.date_type, Date.date)
+class ContactResponseBuilder:
 
-    def __init__(self, **kwargs):
-        self.contact_id = kwargs.get('contact_id')
-        self.fname = kwargs.get('fname')
-        self.mname = kwargs.get('mname')
-        self.lname = kwargs.get('lname')
+    def __init__(self, contact: Contact):
+        self.contact_id = contact.contact_id
+        self.fname = contact.fname
+        self.mname = contact.mname
+        self.lname = contact.lname
         self.addresses = []
         self.phones = []
         self.dates = []
@@ -83,12 +106,67 @@ class ContactSchema:
         }
         return data
 
-    def add_address(self, address):
-        # TODO: Get address REST
+    def build_address(self, address: Address):
         self.addresses.append(address.as_dict())
+        return self
 
-    def add_phones(self, phone):
+    def build_phones(self, phone: Phone):
         self.phones.append(phone.as_dict())
+        return self
 
-    def add_dates(self, date):
+    def build_dates(self, date: Date):
         self.dates.append(date.as_dict())
+        return self
+
+
+class ContactRequestParser:
+
+    def __init__(self, contact_json):
+        self.contact_id = contact_json.get(Contact.contact_id.name, 0)
+        fname = contact_json[Contact.fname.name]
+        mname = contact_json[Contact.mname.name]
+        lname = contact_json[Contact.lname.name]
+        self.parsed_contact = Contact(fname=fname, mname=mname, lname=lname)
+        if self.contact_id != 0:
+            self.parsed_contact.contact_id = self.contact_id
+        self.addresses = []
+        self.phones = []
+        self.dates = []
+        self.parse_addresses(contact_json.get('addresses', []))
+        self.parse_phones(contact_json.get('phones', []))
+        self.parse_dates(contact_json.get('dates', []))
+
+    def parse_addresses(self, addresses_json):
+        for address_json in addresses_json:
+            address_id = address_json.get(Address.address_id.name, 0)
+            address = address_json[Address.address.name]
+            address_type = address_json[Address.address_type.name]
+            city = address_json[Address.city.name]
+            state = address_json[Address.state.name]
+            zip = address_json[Address.zip.name]
+            address_obj = Address(contact_id=self.contact_id, address=address,
+                                  address_type=address_type, city=city, state=state, zip=zip)
+            if address_id != 0:
+                address_obj.address_id = address_id
+            self.addresses.append(address_obj)
+
+    def parse_dates(self, dates_json):
+        for date_json in dates_json:
+            date_id = date_json.get(Date.date_id.name, 0)
+            date = date_json[Date.date.name]
+            date_type = date_json[Date.date_type.name]
+            date_obj = Date(date_type=date_type, contact_id=self.contact_id, date=date)
+            if date_id != 0:
+                date_obj.date_id = date_id
+            self.dates.append(date_obj)
+
+    def parse_phones(self, phones_json):
+        for phone_json in phones_json:
+            phone_id = phone_json.get(Phone.phone_id.name, 0)
+            phone_type = phone_json[Phone.phone_type.name]
+            area = phone_json[Phone.area.name]
+            number = phone_json[Phone.number.name]
+            phone_obj = Phone(phone_type=phone_type, contact_id=self.contact_id, area=area, number=number)
+            if phone_id != 0:
+                phone_obj.phone_id = phone_id
+            self.phones.append(phone_obj)

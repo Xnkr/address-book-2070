@@ -1,11 +1,13 @@
-from flask import Flask, request, render_template, Response, jsonify
+from flask import Flask, request, Response, jsonify, send_from_directory
 from flask_restful import abort, Api, Resource
 from werkzeug.utils import secure_filename
 from constants import *
 from controller import ContactMgr
+from flask_cors import CORS
 
-app = Flask(APP_NAME, template_folder=relative_path('static'))
+app = Flask(APP_NAME, static_url_path='', static_folder="frontend/public")
 app.config['UPLOAD_FOLDER'] = relative_path('uploads')
+CORS(app)
 api = Api(app)
 
 
@@ -17,7 +19,15 @@ def abort_if_contact_invalid(contact_id):
 def contact_json_validator(json):
     required_fields = ("fname", "mname", "lname", "addresses", "phones", "dates")
     if not all(required_field in json for required_field in required_fields):
-        abort(StandardResponses.BAD_REQUEST_CODE, message="Unknown JSON structure. Required field(s) missing {}".format(required_fields))
+        abort(StandardResponses.BAD_REQUEST_CODE,
+              message="Unknown JSON structure. Required field(s) missing {}".format(required_fields))
+
+
+def arg_parse_to_int(param):
+    if param is not None and str.isnumeric(param):
+        return int(param)
+    else:
+        return 0
 
 
 class Contact(Resource):
@@ -41,7 +51,9 @@ class Contact(Resource):
 
 class ContactList(Resource):
     def get(self):
-        return ContactMgr.get_all_contacts()
+        offset = arg_parse_to_int(request.args.get('offset'))
+        limit = arg_parse_to_int(request.args.get('limit'))
+        return ContactMgr.get_all_contacts(offset, limit)
 
     def post(self):
         body = request.get_json()
@@ -56,7 +68,8 @@ api.add_resource(Contact, '/contacts/<contact_id>')
 
 @app.route('/')
 def root():
-    return render_template('index.html')
+    path = os.path.join('.', 'frontend', 'public')
+    return send_from_directory(path, 'index.html')
 
 
 @app.route('/contacts/bulk_upload', methods=['POST'])

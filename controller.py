@@ -9,7 +9,26 @@ class ContactMgr:
 
     @staticmethod
     def add_contact(body):
-        return 0
+        contact_parser = ContactRequestParser(body)
+        contact = contact_parser.parsed_contact
+        contact_id = -1
+        with DBManager.create_session_scope() as session:
+            session.add(contact)
+            session.flush()
+            contact_id = contact.contact_id
+            if contact_parser.addresses:
+                for address in contact_parser.addresses:
+                    address.contact_id = contact.contact_id
+                    session.add(address)
+            if contact_parser.phones:
+                for phone in contact_parser.phones:
+                    phone.contact_id = contact.contact_id
+                    session.add(phone)
+            if contact_parser.dates:
+                for date in contact_parser.dates:
+                    date.contact_id = contact.contact_id
+                    session.add(date)
+        return contact_id
 
     @staticmethod
     def delete_contact(contact_id):
@@ -28,13 +47,27 @@ class ContactMgr:
         pass
 
     @staticmethod
-    def get_all_contacts():
+    def get_all_contacts(offset=0, limit=0):
+        response = []
         with DBManager.create_session_scope() as session:
-            records = session.query(*ContactSchema.select_columns)\
-                .outerjoin(Address, Address.contact_id == Contact.contact_id)\
-                .outerjoin(Phone, Phone.contact_id == Contact.contact_id)\
-                .outerjoin(Date, Date.contact_id == Contact.contact_id).all()
-            return records
+            contacts_query = session.query(Contact)
+            if offset > 0:
+                contacts_query = contacts_query.offset(offset)
+            if limit > 0:
+                contacts_query = contacts_query.limit(limit)
+            for contact in contacts_query.all():
+                contact_builder = ContactResponseBuilder(contact)
+                addresses = session.query(Address).filter(contact.contact_id == Address.contact_id).all()
+                phones = session.query(Phone).filter(contact.contact_id == Phone.contact_id).all()
+                dates = session.query(Date).filter(contact.contact_id == Date.contact_id).all()
+                for address in addresses:
+                    contact_builder.build_address(address)
+                for phone in phones:
+                    contact_builder.build_phones(phone)
+                for date in dates:
+                    contact_builder.build_dates(date)
+                response.append(contact_builder.as_dict())
+        return response
 
     @staticmethod
     def process_bulk_import(file_path):
@@ -55,6 +88,7 @@ class ContactMgr:
             if 'date_type' in columns:
                 date = Date(contact_id=contact.contact_id, date_type=row['date_type'], date=row['date'])
                 session.add(date)
+
         try:
             with open(file_path) as fd, DBManager.create_session_scope(autoflush=True) as session:
                 reader = csv.DictReader(fd)
@@ -69,6 +103,7 @@ class ContactMgr:
             logger.exception("File not found")
             return StandardResponses.SERVER_ERROR_CODE
         return StandardResponses.SUCCESS_CODE
+
 
 if __name__ == '__main__':
     ContactMgr.process_bulk_import('DbProj.csv')

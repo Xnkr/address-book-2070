@@ -52,3 +52,5 @@ class DBManager:
 if __name__ == '__main__':
     DBManager.init()
     DBManager.reinitialize()
+    with DBManager.create_session_scope() as session:
+        print(session.query(Contact).all())

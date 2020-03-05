@@ -3,6 +3,7 @@ from db_manager import DBManager
 from models import *
 import csv
 from utils import get_null_or_string
+from sqlalchemy import func
 
 
 class ContactMgr:
@@ -32,7 +33,8 @@ class ContactMgr:
 
     @staticmethod
     def delete_contact(contact_id):
-        pass
+        with DBManager.create_session_scope() as session:
+            session.query(Contact).filter(Contact.contact_id == contact_id).delete()
 
     @staticmethod
     def update_contact(contact_id, body):
@@ -40,11 +42,26 @@ class ContactMgr:
 
     @staticmethod
     def get_contact(contact_id):
-        pass
+        with DBManager.create_session_scope() as session:
+            contact = session.query(Contact).filter(Contact.contact_id == contact_id).first()
+            response_builder = ContactResponseBuilder(contact)
+            addresses = session.query(Address).filter(Address.contact_id == contact_id).all()
+            for address in addresses:
+                response_builder.build_address(address)
+            phones = session.query(Phone).filter(Phone.contact_id == contact_id).all()
+            for phone in phones:
+                response_builder.build_phones(phone)
+            dates = session.query(Date).filter(Date.contact_id == contact_id).all()
+            for date in dates:
+                response_builder.build_dates(date)
+            return response_builder.as_dict()
 
     @staticmethod
     def is_valid_contact(contact_id):
-        pass
+        with DBManager.create_session_scope() as session:
+            counter = session.query(func.count(Contact.contact_id))\
+                .filter(Contact.contact_id == contact_id)
+            return counter.scalar()
 
     @staticmethod
     def get_all_contacts(offset=0, limit=0):

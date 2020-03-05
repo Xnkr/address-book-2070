@@ -24,6 +24,7 @@ if not logger.handlers:
     handler.setFormatter(f_format)
     logger.addHandler(handler)
 
+
 class StandardResponses:
     SUCCESS_NO_RESPONSE = 204
     CREATED = 201
@@ -33,4 +34,3 @@ class StandardResponses:
     NOT_FOUND_CODE = 404
     SERVER_ERROR_CODE = 500
     SERVER_ERROR = {'Error': 'Server Error occurred'}
-

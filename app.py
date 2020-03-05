@@ -12,7 +12,7 @@ api = Api(app)
 
 
 def abort_if_contact_invalid(contact_id):
-    if ContactMgr.is_valid_contact(contact_id):
+    if not ContactMgr.is_valid_contact(contact_id):
         abort(StandardResponses.NOT_FOUND_CODE, message="Contact {} doesn't exist".format(contact_id))
 
 
@@ -42,7 +42,6 @@ class Contact(Resource):
         return '', StandardResponses.SUCCESS_NO_RESPONSE
 
     def put(self, contact_id):
-        abort_if_contact_invalid(contact_id)
         body = request.get_json()
         contact_json_validator(body)
         resp = ContactMgr.update_contact(contact_id, body)
@@ -93,6 +92,11 @@ def bulk_upload_csv():
             if process_status == StandardResponses.SERVER_ERROR_CODE:
                 return Response(jsonify(StandardResponses.SERVER_ERROR), status=StandardResponses.SERVER_ERROR_CODE)
         return Response(status=StandardResponses.SUCCESS_CODE)
+
+
+@app.before_request
+def log_request():
+    logger.info(f"{request.remote_addr} - [{request.method}] {request.path}")
 
 
 if __name__ == '__main__':

@@ -1,9 +1,8 @@
-from contextlib import contextmanager
-
 from constants import *
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, scoped_session
-
+from contextlib import contextmanager
+import sqlite3
 from models import *
 
 
@@ -14,7 +13,15 @@ class DBManager:
 
     @staticmethod
     def init():
-        DBManager.engine = create_engine('sqlite:///{}'.format(DB_FILE))
+        DBManager.engine = create_engine('sqlite:///{}'.format(DB_FILE), echo=True)
+
+        @event.listens_for(DBManager.engine, "connect")
+        def set_sqlite_pragma(dbapi_connection, connection_record):
+            if type(dbapi_connection) is sqlite3.Connection:
+                cursor = dbapi_connection.cursor()
+                cursor.execute("PRAGMA foreign_keys=ON")
+                cursor.close()
+
         DBManager.Session = sessionmaker(bind=DBManager.engine, autoflush=True)
         DBManager.ScopedSession = scoped_session(sessionmaker(bind=DBManager.engine))
 

@@ -9,9 +9,16 @@ from models import *
 
 
 class ContactMgr:
+    """
+        Contact Manager for processing incoming requests
+    """
 
     @staticmethod
     def add_contact(body):
+        """
+            Creates a contact
+            :param body: JSON request
+        """
         contact_parser = ContactRequestParser(body)
         contact = contact_parser.parsed_contact
         contact_id = -1
@@ -35,11 +42,19 @@ class ContactMgr:
 
     @staticmethod
     def delete_contact(contact_id):
+        """
+            Deletes contact
+            Attributes are deleted with ONDELETE CASCADE
+            :param contact_id: contact_id of the contact to be deleted
+        """
         with DBManager.create_session_scope() as session:
             session.query(Contact).filter(Contact.contact_id == contact_id).delete()
 
     @staticmethod
     def update_contact(contact_id, body):
+        """
+            Updates contact if contact_id exists or creates contact
+        """
         with DBManager.create_session_scope() as session:
             retrieved_contact = session.query(Contact).filter(Contact.contact_id == contact_id).first()
             if retrieved_contact is None:
@@ -54,19 +69,30 @@ class ContactMgr:
                     retrieved_contact.update(parsed_contact)
                     session.add(retrieved_contact)
 
+                # Need to add/update/delete attributes(Address, Phone, Date)
                 for attribute in contact_parser.attributes.keys():
+                    # For each attribute fetch all records for the contact
                     retrieved_attributes = session.query(attribute).filter(attribute.contact_id == contact_id).all()
+                    # Get primary key of the attribute
                     attr_primary_key = inspect(attribute).primary_key[0]
                     pk_name = attr_primary_key.name
+                    # Construct dictionary of {primary key value: column object}
+                    # Example: Date attribute
+                    #          { 1: <Date(1 | 1 | Birthday | 05/15/2020)> }
                     retrieved_map = {
                         vars(r_attr)[pk_name]: r_attr for r_attr in retrieved_attributes
                     }
+                    # For each attribute received in request (parsed)
                     for p_attr in contact_parser.attributes[attribute]:
+                        # Get value of primary key of the parsed attribute
                         p_attr_id = vars(p_attr).get(attr_primary_key.name, 0)
+                        # Try to add/update parsed attribute
                         ContactMgr.update_attribute(contact_id, p_attr, p_attr_id, attribute, attr_primary_key, session)
                         if p_attr_id in retrieved_map:
+                            # Remove from dictionary if received attribute is in database
                             del retrieved_map[p_attr_id]
                     if retrieved_map:
+                        # There are values in database but not in received request. So delete rows in retrieved_map
                         for key_to_delete in retrieved_map.keys():
                             session.query(attribute).filter(attr_primary_key == key_to_delete).delete()
 
@@ -75,16 +101,22 @@ class ContactMgr:
     @staticmethod
     def update_attribute(contact_id, parsed_attribute, parsed_attribute_id, attribute, attr_primary_key, session):
         if parsed_attribute_id == 0:
+            # Need to add attribute
             parsed_attribute.contact_id = contact_id
             session.add(parsed_attribute)
         else:
+            # Fetch attribute from database
             retrieved_attr = session.query(attribute).filter(attr_primary_key == parsed_attribute_id).first()
             if parsed_attribute != retrieved_attr:
+                # Some attribute value has changed, so update
                 retrieved_attr.update(parsed_attribute)
                 session.add(retrieved_attr)
 
     @staticmethod
     def get_contact(contact_id):
+        """
+            Fetches the contact with contact_id
+        """
         with DBManager.create_session_scope() as session:
             contact = session.query(Contact).filter(Contact.contact_id == contact_id).first()
             response_builder = ContactResponseBuilder(contact)
@@ -101,6 +133,9 @@ class ContactMgr:
 
     @staticmethod
     def is_valid_contact(contact_id):
+        """
+            Returns count of Contacts with contact_id
+        """
         with DBManager.create_session_scope() as session:
             counter = session.query(func.count(Contact.contact_id)) \
                 .filter(Contact.contact_id == contact_id)
@@ -108,8 +143,13 @@ class ContactMgr:
 
     @staticmethod
     def search(q):
+        """
+            Searches contact database with query `q` in Name/Address/Phone fields
+            :param q: Search parameter
+        """
         response = []
         with DBManager.create_session_scope() as session:
+            # Convert search query to SQL like format
             q = f'%{q}%'
             results = session.query(Contact).outerjoin(Address, Address.contact_id == Contact.contact_id) \
                 .outerjoin(Phone, Phone.contact_id == Contact.contact_id).filter(
@@ -132,6 +172,11 @@ class ContactMgr:
 
     @staticmethod
     def get_all_contacts(offset=0, limit=0):
+        """
+            Fetches all contacts in Database
+            :param offset: Start index to query from
+            :param limit: Number of records to fetch
+        """
         response = []
         with DBManager.create_session_scope() as session:
             contacts_query = session.query(Contact)
@@ -146,7 +191,13 @@ class ContactMgr:
 
     @staticmethod
     def process_bulk_import(file_path):
+        """
+            Creates contacts from CSV file records
+        """
         def add_contact_from_file(columns, row, session):
+            """
+                Create contact from row
+            """
             def get_null_or_string(string):
                 return string if len(string) > 0 else None
 
@@ -184,6 +235,9 @@ class ContactMgr:
 
     @staticmethod
     def build_response(contact, session):
+        """
+            Builds JSON response for the given contact
+        """
         contact_builder = ContactResponseBuilder(contact)
         addresses = session.query(Address).filter(contact.contact_id == Address.contact_id).all()
         phones = session.query(Phone).filter(contact.contact_id == Phone.contact_id).all()

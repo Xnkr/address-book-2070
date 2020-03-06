@@ -8,6 +8,9 @@ Base = declarative_base()
 
 
 class Contact(Base):
+    """
+        Model for Contact Table
+    """
     __tablename__ = 'CONTACT'
     contact_id = Column('contact_id', Integer, primary_key=True)
     fname = Column('fname', String, nullable=False)
@@ -18,18 +21,28 @@ class Contact(Base):
         return f"<Contact({self.contact_id} | {self.fname} | {self.mname} | {self.lname})>"
 
     def __eq__(self, other):
+        """
+            Compares two objects attributes
+        """
         return all((self.contact_id == other.contact_id,
                     self.fname == other.fname,
                     self.lname == other.lname,
                     self.mname == other.mname))
 
     def update(self, other):
+        """
+            Sets self class attributes from other object
+            :param other: object to update attributes from
+        """
         self.fname = other.fname
         self.lname = other.lname
         self.mname = other.mname
 
 
 class Address(Base):
+    """
+        Model for Address Table
+    """
     __tablename__ = 'ADDRESS'
     address_id = Column('address_id', Integer, primary_key=True)
     contact_id = Column('contact_id', ForeignKey('CONTACT.contact_id', ondelete="CASCADE"))
@@ -44,6 +57,9 @@ class Address(Base):
                f"| {self.city} | {self.state} | {self.zip})>"
 
     def as_dict(self):
+        """
+            Returns class attributes as dictionary
+        """
         data = {
             'address_id': self.address_id,
             'address_type': self.address_type,
@@ -55,6 +71,10 @@ class Address(Base):
         return data
 
     def update(self, other):
+        """
+            Sets self class attributes from other object
+            :param other: object to update attributes from
+        """
         self.address_type = other.address_type
         self.address = other.address
         self.city = other.city
@@ -62,6 +82,9 @@ class Address(Base):
         self.zip = other.zip
 
     def __eq__(self, other):
+        """
+            Compares two objects attributes
+        """
         return all((self.address_type == other.address_type,
                     self.address == other.address,
                     self.city == other.city,
@@ -70,6 +93,9 @@ class Address(Base):
 
 
 class Phone(Base):
+    """
+        Model for Phone Table
+    """
     __tablename__ = 'PHONE'
     phone_id = Column('phone_id', Integer, primary_key=True)
     contact_id = Column('contact_id', ForeignKey('CONTACT.contact_id', ondelete="CASCADE"))
@@ -81,16 +107,26 @@ class Phone(Base):
         return f"<Phone({self.phone_id} | {self.contact_id} | {self.phone_type} | {self.area} | {self.number})>"
 
     def update(self, other):
+        """
+            Sets self class attributes from other object
+            :param other: object to update attributes from
+        """
         self.phone_type = other.phone_type
         self.area = other.area
         self.number = other.number
 
     def __eq__(self, other):
+        """
+            Compares two objects attributes
+        """
         return all((self.phone_type == other.phone_type,
                     self.area == other.area,
                     self.number == other.number))
 
     def as_dict(self):
+        """
+            Returns class attributes as dictionary
+        """
         data = {
             'phone_id': self.phone_id,
             'phone_type': self.phone_type,
@@ -101,6 +137,9 @@ class Phone(Base):
 
 
 class Date(Base):
+    """
+        Model for Date Table
+    """
     __tablename__ = "DATE"
     date_id = Column('date_id', Integer, primary_key=True)
     contact_id = Column('contact_id', ForeignKey('CONTACT.contact_id', ondelete="CASCADE"))
@@ -111,14 +150,24 @@ class Date(Base):
         return f"<Date({self.date_id} | {self.contact_id} | {self.date_type} | {self.date})>"
 
     def update(self, other):
+        """
+            Sets self class attributes from other object
+            :param other: object to update attributes from
+        """
         self.date_type = other.date_type
         self.date = other.date
 
     def __eq__(self, other):
+        """
+            Compares two objects attributes
+        """
         return all((self.date_type == other.date_type,
                     self.date == other.date))
 
     def as_dict(self):
+        """
+            Returns class attributes as a Dictionary
+        """
         data = {
             'date_id': self.date_id,
             'date_type': self.date_type,
@@ -128,6 +177,9 @@ class Date(Base):
 
 
 class ContactResponseBuilder:
+    """
+        Builder class for Constructing JSON response for GET requests
+    """
 
     def __init__(self, contact: Contact):
         self.contact_id = contact.contact_id
@@ -164,7 +216,9 @@ class ContactResponseBuilder:
 
 
 class ContactRequestParser:
-
+    """
+        Parser class for parsing JSON requests from POST/PUT requests
+    """
     def __init__(self, contact_json, contact_id=0):
         self.contact_id = contact_id
         fname = contact_json[Contact.fname.name]

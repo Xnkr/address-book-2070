@@ -14,6 +14,7 @@ def relative_path(x):
 LOG_DIR = relative_path('logs')
 LOG_FILE = opj(LOG_DIR, 'contact_list.log')
 
+# Initialize logger
 logger = logging.getLogger(APP_NAME)
 if not logger.handlers:
     logger.setLevel(logging.INFO)

@@ -4,6 +4,7 @@ from models import *
 import csv
 from utils import get_null_or_string
 from sqlalchemy import func
+from sqlalchemy.inspection import inspect
 
 
 class ContactMgr:
@@ -38,7 +39,48 @@ class ContactMgr:
 
     @staticmethod
     def update_contact(contact_id, body):
-        pass
+        with DBManager.create_session_scope() as session:
+            retrieved_contact = session.query(Contact).filter(Contact.contact_id == contact_id).first()
+            if retrieved_contact is None:
+                # Need to add contact
+                contact_id = ContactMgr.add_contact(body)
+                return contact_id, StandardResponses.CREATED
+            else:
+                # Need to update
+                contact_parser = ContactRequestParser(body, contact_id)
+                parsed_contact = contact_parser.parsed_contact
+                if parsed_contact != retrieved_contact:
+                    retrieved_contact.update(parsed_contact)
+                    session.add(retrieved_contact)
+
+                for attribute in contact_parser.attributes.keys():
+                    retrieved_attributes = session.query(attribute).filter(attribute.contact_id == contact_id).all()
+                    attr_primary_key = inspect(attribute).primary_key[0]
+                    pk_name = attr_primary_key.name
+                    retrieved_map = {
+                        vars(r_attr)[pk_name]: r_attr for r_attr in retrieved_attributes
+                    }
+                    for p_attr in contact_parser.attributes[attribute]:
+                        p_attr_id = vars(p_attr).get(attr_primary_key.name, 0)
+                        ContactMgr.update_attribute(contact_id, p_attr, p_attr_id, attribute, attr_primary_key, session)
+                        if p_attr_id in retrieved_map:
+                            del retrieved_map[p_attr_id]
+                    if retrieved_map:
+                        for key_to_delete in retrieved_map.keys():
+                            session.query(attribute).filter(attr_primary_key == key_to_delete).delete()
+
+                return '', StandardResponses.SUCCESS_NO_RESPONSE
+
+    @staticmethod
+    def update_attribute(contact_id, parsed_attribute, parsed_attribute_id, attribute, attr_primary_key, session):
+        if parsed_attribute_id == 0:
+            parsed_attribute.contact_id = contact_id
+            session.add(parsed_attribute)
+        else:
+            retrieved_attr = session.query(attribute).filter(attr_primary_key == parsed_attribute_id).first()
+            if parsed_attribute != retrieved_attr:
+                retrieved_attr.update(parsed_attribute)
+                session.add(retrieved_attr)
 
     @staticmethod
     def get_contact(contact_id):
@@ -59,7 +101,7 @@ class ContactMgr:
     @staticmethod
     def is_valid_contact(contact_id):
         with DBManager.create_session_scope() as session:
-            counter = session.query(func.count(Contact.contact_id))\
+            counter = session.query(func.count(Contact.contact_id)) \
                 .filter(Contact.contact_id == contact_id)
             return counter.scalar()
 

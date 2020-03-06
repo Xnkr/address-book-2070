@@ -44,8 +44,14 @@ class Contact(Resource):
     def put(self, contact_id):
         body = request.get_json()
         contact_json_validator(body)
-        resp = ContactMgr.update_contact(contact_id, body)
-        return resp, StandardResponses.CREATED
+        resp = ''
+        try:
+            resp, status = ContactMgr.update_contact(contact_id, body)
+        except TypeError as e:
+            return {'Error': str(e)}, StandardResponses.BAD_REQUEST_CODE
+        if resp:
+            resp = {'contact_id': contact_id}
+        return resp, status
 
 
 class ContactList(Resource):
@@ -57,12 +63,15 @@ class ContactList(Resource):
     def post(self):
         body = request.get_json()
         contact_json_validator(body)
-        contact_id = ContactMgr.add_contact(body)
-        return {'contact_id': contact_id}, StandardResponses.CREATED
+        try:
+            contact_id = ContactMgr.add_contact(body)
+            return {'contact_id': contact_id}, StandardResponses.CREATED
+        except TypeError as e:
+            return {'Error': str(e)}, StandardResponses.BAD_REQUEST_CODE
 
 
 api.add_resource(ContactList, '/contacts')
-api.add_resource(Contact, '/contacts/<contact_id>')
+api.add_resource(Contact, '/contacts/<int:contact_id>')
 
 
 @app.route('/')

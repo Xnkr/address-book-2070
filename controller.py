@@ -1,10 +1,11 @@
 from constants import *
+import csv
+
+from sqlalchemy import func, or_
+from sqlalchemy.inspection import inspect
+
 from db_manager import DBManager
 from models import *
-import csv
-from utils import get_null_or_string
-from sqlalchemy import func
-from sqlalchemy.inspection import inspect
 
 
 class ContactMgr:
@@ -106,6 +107,30 @@ class ContactMgr:
             return counter.scalar()
 
     @staticmethod
+    def search(q):
+        response = []
+        with DBManager.create_session_scope() as session:
+            q = f'%{q}%'
+            results = session.query(Contact).outerjoin(Address, Address.contact_id == Contact.contact_id) \
+                .outerjoin(Phone, Phone.contact_id == Contact.contact_id).filter(
+                or_(
+                    Contact.fname.like(q),
+                    Contact.mname.like(q),
+                    Contact.lname.like(q),
+                    Address.address.like(q),
+                    Address.city.like(q),
+                    Address.state.like(q),
+                    Address.zip.like(q),
+                    Phone.area.like(q),
+                    Phone.number.like(q)
+                )
+            ).all()
+            for result in results:
+                built_contact = ContactMgr.build_response(result, session)
+                response.append(built_contact.as_dict())
+        return response
+
+    @staticmethod
     def get_all_contacts(offset=0, limit=0):
         response = []
         with DBManager.create_session_scope() as session:
@@ -115,22 +140,16 @@ class ContactMgr:
             if limit > 0:
                 contacts_query = contacts_query.limit(limit)
             for contact in contacts_query.all():
-                contact_builder = ContactResponseBuilder(contact)
-                addresses = session.query(Address).filter(contact.contact_id == Address.contact_id).all()
-                phones = session.query(Phone).filter(contact.contact_id == Phone.contact_id).all()
-                dates = session.query(Date).filter(contact.contact_id == Date.contact_id).all()
-                for address in addresses:
-                    contact_builder.build_address(address)
-                for phone in phones:
-                    contact_builder.build_phones(phone)
-                for date in dates:
-                    contact_builder.build_dates(date)
-                response.append(contact_builder.as_dict())
+                built_contact = ContactMgr.build_response(contact, session)
+                response.append(built_contact.as_dict())
         return response
 
     @staticmethod
     def process_bulk_import(file_path):
         def add_contact_from_file(columns, row, session):
+            def get_null_or_string(string):
+                return string if len(string) > 0 else None
+
             contact = Contact(fname=row['fname'], mname=get_null_or_string(row['mname']),
                               lname=row['lname'])
             session.add(contact)
@@ -151,10 +170,10 @@ class ContactMgr:
         try:
             with open(file_path) as fd, DBManager.create_session_scope(autoflush=True) as session:
                 reader = csv.DictReader(fd)
-                columns = reader.fieldnames
+                cols = reader.fieldnames
                 try:
                     for row in reader:
-                        add_contact_from_file(columns, row, session)
+                        add_contact_from_file(cols, row, session)
                 except KeyError:
                     logger.exception("Incorrect key")
                     return StandardResponses.BAD_REQUEST_CODE
@@ -162,6 +181,20 @@ class ContactMgr:
             logger.exception("File not found")
             return StandardResponses.SERVER_ERROR_CODE
         return StandardResponses.SUCCESS_CODE
+
+    @staticmethod
+    def build_response(contact, session):
+        contact_builder = ContactResponseBuilder(contact)
+        addresses = session.query(Address).filter(contact.contact_id == Address.contact_id).all()
+        phones = session.query(Phone).filter(contact.contact_id == Phone.contact_id).all()
+        dates = session.query(Date).filter(contact.contact_id == Date.contact_id).all()
+        for address in addresses:
+            contact_builder.build_address(address)
+        for phone in phones:
+            contact_builder.build_phones(phone)
+        for date in dates:
+            contact_builder.build_dates(date)
+        return contact_builder
 
 
 if __name__ == '__main__':

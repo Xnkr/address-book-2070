@@ -13,6 +13,7 @@ class DBManager:
 
     @staticmethod
     def init():
+        # TODO: Turn off echo
         DBManager.engine = create_engine('sqlite:///{}'.format(DB_FILE), echo=True)
 
         @event.listens_for(DBManager.engine, "connect")

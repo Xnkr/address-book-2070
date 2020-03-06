@@ -23,11 +23,7 @@ def contact_json_validator(json):
               message="Unknown JSON structure. Required field(s) missing {}".format(required_fields))
 
 
-def arg_parse_to_int(param):
-    if param is not None and str.isnumeric(param):
-        return int(param)
-    else:
-        return 0
+def arg_parse_to_int(param): return int(param) if param is not None and str.isnumeric(param) else 0
 
 
 class Contact(Resource):
@@ -58,6 +54,9 @@ class ContactList(Resource):
     def get(self):
         offset = arg_parse_to_int(request.args.get('offset'))
         limit = arg_parse_to_int(request.args.get('limit'))
+        q = request.args.get('q')
+        if q:
+            return ContactMgr.search(q)
         return ContactMgr.get_all_contacts(offset, limit)
 
     def post(self):

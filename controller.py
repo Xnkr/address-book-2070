@@ -156,7 +156,7 @@ class ContactMgr:
                     Phone.area.like(q),
                     Phone.number.like(q)
                 )
-            ).all()
+            ).order_by(Contact.fname).all()
             for result in results:
                 built_contact = ContactMgr.build_response(result, session, minimal)
                 response.append(built_contact.as_dict(minimal=minimal))
@@ -172,7 +172,7 @@ class ContactMgr:
         """
         response = []
         with DBManager.create_session_scope() as session:
-            contacts_query = session.query(Contact)
+            contacts_query = session.query(Contact).order_by(Contact.fname)
             if offset > 0:
                 contacts_query = contacts_query.offset(offset)
             if limit > 0:

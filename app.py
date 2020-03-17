@@ -74,7 +74,7 @@ class Contact(Resource):
         try:
             resp, status = ContactMgr.update_contact(contact_id, body)
         except TypeError as e:
-            return {'Error': str(e)}, StandardResponses.BAD_REQUEST_CODE
+            abort(StandardResponses.BAD_REQUEST_CODE, message=str(e))
         if resp:
             resp = {'contact_id': contact_id}
         return resp, status
@@ -110,7 +110,7 @@ class ContactList(Resource):
             contact_id = ContactMgr.add_contact(body)
             return {'contact_id': contact_id}, StandardResponses.CREATED
         except TypeError as e:
-            return {'Error': str(e)}, StandardResponses.BAD_REQUEST_CODE
+            abort(StandardResponses.BAD_REQUEST_CODE, message=str(e))
 
 
 # Assign endpoints to resource

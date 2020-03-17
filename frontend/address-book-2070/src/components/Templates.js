@@ -31,6 +31,15 @@ export default class Contact {
         date: ""
     };
 
+    getEmptyField(field){
+        switch (field){
+            case 'addresses': return this.addressTemplate;
+            case 'dates': return this.dateTemplate;
+            case 'phones': return this.phoneTemplate;
+            default: return {}
+        }
+    }
+
     emptyContact() {
         let emptyContact = this.contactTemplate;
         emptyContact.addresses.push(this.addressTemplate);

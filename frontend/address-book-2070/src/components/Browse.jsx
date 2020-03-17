@@ -26,7 +26,7 @@ export default class Browse extends React.Component {
                             <FontAwesomeIcon icon={faPlus} size="lg"/>
                         </button>
                     </div>
-                    <input type="text" className="form-control" placeholder="Search"
+                    <input type="search" className="form-control" placeholder="Search"
                            aria-label="Search" onChange={this.updateQuery}/>
                     <div className="input-group-append">
                         <button className="btn btn-primary" type="submit">Search

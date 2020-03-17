@@ -116,7 +116,7 @@ ol, li {
     color: green;
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: 75%;
     -moz-transform: translateX(-50%) translateY(-50%);
     -webkit-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
@@ -161,8 +161,8 @@ ol, li {
 .remove-field {
     color: red;
     position: absolute;
-    top: 15%;
-    left: 50%;
+    top: 50%;
+    left: 25%;
     -moz-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
 }

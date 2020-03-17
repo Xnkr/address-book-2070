@@ -1,0 +1,8 @@
+{
+  "short_name": "AddressBook 2070",
+  "name": "Address Book 2070",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

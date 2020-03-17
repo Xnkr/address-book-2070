@@ -1,0 +1,157 @@
+body {
+    font-family: 'Roboto Mono', sans-serif;
+}
+
+.fill-height {
+    min-height: 100%;
+}
+
+.zero-pad {
+    padding: 0px;
+}
+
+.header {
+    font-weight: 500;
+    font-family: 'Faster One', sans-serif;
+    font-size: 45px;
+}
+
+.overall-header {
+    height: 15vh;
+}
+
+.headline {
+    text-align: center;
+    padding-top: 14px;
+}
+
+.main-app {
+    border-radius: 5px;
+    height: 75vh;
+    margin-bottom: 10vh;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 1);
+}
+
+.search-col {
+    padding-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+th {
+    border-bottom: 1px solid #ddd;
+}
+
+.contact-action {
+    text-align: right;
+}
+
+.contact-list {
+    overflow-y: scroll;
+    overflow-x: scroll;
+    max-height: 400px;
+}
+
+#style-1::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    background-color: #F5F5F5;
+}
+
+#style-1::-webkit-scrollbar {
+    width: 12px;
+    background-color: #F5F5F5;
+}
+
+#style-1::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+    background-color: #555;
+}
+
+ol, li {
+    padding: 5px;
+    list-style: none;
+}
+
+.list-item {
+    padding-bottom: 15px;
+    border-bottom: 1px solid grey;
+    border-top: 1px solid white;
+    white-space: nowrap;
+    word-wrap: normal;
+    max-width: 100%;
+    font-weight: 800;
+}
+
+.list-action {
+    float: right;
+    margin-left: -1.5em;
+    z-index: 100;
+}
+
+.list-delete {
+    color: red;
+}
+
+.list-edit {
+    color: green;
+}
+
+.list-edit:hover, .list-delete:hover {
+    color: blue;
+    cursor: pointer;
+}
+
+.contact-select {
+    transition: all .2s ease-in-out;
+}
+
+.contact-select:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.add-field {
+    color: green;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.add-field:hover {
+    color: blue;
+    cursor: pointer;
+}
+
+.pad-15 {
+    padding: 15px;
+}
+
+.detail-panel {
+    overflow-y: scroll;
+    min-height: 100%;
+    padding-left: 10px;
+    max-height: 400px;
+}
+
+.contact-name-lg {
+    border-style: solid;
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    margin-right: 10px;
+    margin-left: 5px;
+}
+
+.contact-detail-form {
+    padding-top: 20px;
+    padding-right: 10px;
+}
+
+.form-control-plaintext {
+    font-weight: bold;
+}

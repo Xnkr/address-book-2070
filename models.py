@@ -190,16 +190,17 @@ class ContactResponseBuilder:
         self.phones = []
         self.dates = []
 
-    def as_dict(self):
+    def as_dict(self, minimal=False):
         data = {
             'contact_id': self.contact_id,
             'fname': self.fname,
             'mname': self.mname,
-            'lname': self.lname,
-            'addresses': self.addresses,
-            'phones': self.phones,
-            'dates': self.dates
+            'lname': self.lname
         }
+        if not minimal:
+            data['addresses'] = self.addresses
+            data['phones'] = self.phones
+            data['dates'] = self.dates
         return data
 
     def build_address(self, address: Address):

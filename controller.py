@@ -119,17 +119,8 @@ class ContactMgr:
         """
         with DBManager.create_session_scope() as session:
             contact = session.query(Contact).filter(Contact.contact_id == contact_id).first()
-            response_builder = ContactResponseBuilder(contact)
-            addresses = session.query(Address).filter(Address.contact_id == contact_id).all()
-            for address in addresses:
-                response_builder.build_address(address)
-            phones = session.query(Phone).filter(Phone.contact_id == contact_id).all()
-            for phone in phones:
-                response_builder.build_phones(phone)
-            dates = session.query(Date).filter(Date.contact_id == contact_id).all()
-            for date in dates:
-                response_builder.build_dates(date)
-            return response_builder.as_dict()
+            built_contact = ContactMgr.build_response(contact, session)
+            return built_contact.as_dict()
 
     @staticmethod
     def is_valid_contact(contact_id):
@@ -142,10 +133,11 @@ class ContactMgr:
             return counter.scalar()
 
     @staticmethod
-    def search(q):
+    def search(q, minimal=False):
         """
             Searches contact database with query `q` in Name/Address/Phone fields
             :param q: Search parameter
+            :param minimal: Returns only contact info
         """
         response = []
         with DBManager.create_session_scope() as session:
@@ -166,16 +158,17 @@ class ContactMgr:
                 )
             ).all()
             for result in results:
-                built_contact = ContactMgr.build_response(result, session)
-                response.append(built_contact.as_dict())
+                built_contact = ContactMgr.build_response(result, session, minimal)
+                response.append(built_contact.as_dict(minimal=minimal))
         return response
 
     @staticmethod
-    def get_all_contacts(offset=0, limit=0):
+    def get_all_contacts(offset=0, limit=0, minimal=False):
         """
             Fetches all contacts in Database
             :param offset: Start index to query from
             :param limit: Number of records to fetch
+            :param minimal: Flag for minimal response
         """
         response = []
         with DBManager.create_session_scope() as session:
@@ -185,8 +178,8 @@ class ContactMgr:
             if limit > 0:
                 contacts_query = contacts_query.limit(limit)
             for contact in contacts_query.all():
-                built_contact = ContactMgr.build_response(contact, session)
-                response.append(built_contact.as_dict())
+                built_contact = ContactMgr.build_response(contact, session, minimal)
+                response.append(built_contact.as_dict(minimal=minimal))
         return response
 
     @staticmethod
@@ -194,10 +187,12 @@ class ContactMgr:
         """
             Creates contacts from CSV file records
         """
+
         def add_contact_from_file(columns, row, session):
             """
                 Create contact from row
             """
+
             def get_null_or_string(string):
                 return string if len(string) > 0 else None
 
@@ -234,11 +229,13 @@ class ContactMgr:
         return StandardResponses.SUCCESS_CODE
 
     @staticmethod
-    def build_response(contact, session):
+    def build_response(contact, session, minimal=False):
         """
             Builds JSON response for the given contact
         """
         contact_builder = ContactResponseBuilder(contact)
+        if minimal:
+            return contact_builder
         addresses = session.query(Address).filter(contact.contact_id == Address.contact_id).all()
         phones = session.query(Phone).filter(contact.contact_id == Phone.contact_id).all()
         dates = session.query(Date).filter(contact.contact_id == Date.contact_id).all()

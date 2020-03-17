@@ -94,9 +94,10 @@ class ContactList(Resource):
         offset = arg_parse_to_int(request.args.get('offset'))
         limit = arg_parse_to_int(request.args.get('limit'))
         q = request.args.get('q')
+        fmt = request.args.get('fmt', '')
         if q:
-            return ContactMgr.search(q)
-        return ContactMgr.get_all_contacts(offset, limit)
+            return ContactMgr.search(q, fmt == 'minimal')
+        return ContactMgr.get_all_contacts(offset, limit, fmt == 'minimal')
 
     def post(self):
         """

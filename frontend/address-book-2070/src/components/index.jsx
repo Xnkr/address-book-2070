@@ -3,7 +3,7 @@ import '../assets/App.css';
 import Browse from "./Browse";
 import axios from "axios";
 import Detail from "./Detail";
-
+import Contact from "./Templates";
 
 class App extends React.Component {
     constructor(props) {
@@ -12,7 +12,8 @@ class App extends React.Component {
             selectedContactId: 0,
             contacts: [],
             selectedContact: {},
-            isEdit: false
+            isEdit: false,
+            isAdd: false
         };
         this.fetchContacts = this.fetchContacts.bind(this);
         this.fetchContactDetails = this.fetchContactDetails.bind(this);
@@ -21,9 +22,13 @@ class App extends React.Component {
         this.handleDelete = this.handleDelete.bind(this);
         this.handleView = this.handleView.bind(this);
         this.handleAdd = this.handleAdd.bind(this);
+        this.handleSave = this.handleSave.bind(this);
+        this.handleFormChange = this.handleFormChange.bind(this);
+        this.handleFormDetailChange = this.handleFormDetailChange.bind(this);
     }
 
-    fetchContacts() {
+    fetchContacts(contact_id) {
+        //TODO: Remove limit
         axios.get('http://localhost:5000/contacts?fmt=minimal&limit=10')
             .then(
                 res => {
@@ -31,7 +36,7 @@ class App extends React.Component {
                     this.setState({
                         contacts: contacts
                     });
-                    this.fetchContactDetails(this.state.contacts[0].contact_id, false);
+                    this.fetchContactDetails(contact_id === undefined ? this.state.contacts[0].contact_id : contact_id, false);
                 }
             );
     }
@@ -44,7 +49,8 @@ class App extends React.Component {
                     this.setState({
                         selectedContactId: contactDetail.contact_id,
                         selectedContact: contactDetail,
-                        isEdit: isEdit
+                        isEdit: isEdit,
+                        isAdd: false
                     })
                 }
             )
@@ -71,12 +77,15 @@ class App extends React.Component {
         this.fetchContactDetails(contactId, false);
     }
 
-    handleSearch(query) {
+    handleSearch(query, e) {
+        e.preventDefault();
         axios.get(`http://localhost:5000/contacts?q=${query}&fmt=minimal`)
             .then(
                 res => {
                     const searchResults = res.data;
                     this.setState({
+                        isSearch: true,
+                        searchQuery: query,
                         contacts: searchResults
                     })
                 }
@@ -84,7 +93,50 @@ class App extends React.Component {
     }
 
     handleAdd() {
+        this.setState({
+            isAdd: true,
+            selectedContact: new Contact().emptyContact(),
+            selectedContactId: 0
+        })
+    }
 
+    handleSave(e){
+        e.preventDefault();
+        //TODO: Catch error
+        const contact = this.state.selectedContact;
+        const contactId = this.state.selectedContactId;
+        if (this.state.isAdd) {
+            axios.post('http://localhost:5000/contacts', contact).then(
+                res => {
+                    this.fetchContacts(res.data.contact_id);
+                }
+            )
+        } else if (this.state.isEdit) {
+            axios.put(`http://localhost:5000/contacts/${contactId}`, contact)
+                .then(
+                    res => {
+                        this.fetchContacts(contactId);
+                    }
+                )
+        }
+    }
+
+    handleFormChange(formField, e){
+        // TODO: Immutable update
+        const contact = this.state.selectedContact;
+        contact[formField] = e.target.value;
+        this.setState({
+            selectedContact: contact
+        })
+    }
+
+    handleFormDetailChange(detail, id, formField, e){
+        // TODO: Immutable update
+        const contact = this.state.selectedContact;
+        contact[detail][id][formField] = e.target.value;
+        this.setState({
+            selectedContact: contact
+        })
     }
 
     render() {
@@ -98,15 +150,24 @@ class App extends React.Component {
                 </div>
                 <div className="container main-app">
                     <div className="row fill-height">
-                        <Browse searchFn={(query) => this.handleSearch(query)}
+                        <Browse searchFn={(query, e) => this.handleSearch(query, e)}
                                 contacts={this.state.contacts}
                                 deleteFn={(contactId) => this.handleDelete(contactId)}
                                 editFn={(contactId) => this.handleEdit(contactId)}
                                 viewFn={(contactId) => this.handleView(contactId)}
                                 addFn={() => this.handleAdd()}
                         />
-                        <Detail contact={this.state.selectedContact}
-                                isEdit={this.state.isEdit} />
+                        <Detail contact={selectedContact}
+                                isAdd={this.state.isAdd}
+                                isEdit={this.state.isEdit}
+                                editFn={(contactId) => this.handleEdit(contactId)}
+                                deleteFn={(contactId) => this.handleDelete(contactId)}
+                                saveFn={(e) => this.handleSave(e)}
+                                handleFormChange={(formField, e) => this.handleFormChange(formField, e)}
+                                handleFormDetailChange={(detail, id, formField, e) =>
+                                    this.handleFormDetailChange(detail, id, formField, e)}
+                                //TODO: Add field/Remove field
+                        />
                     </div>
                 </div>
             </div>

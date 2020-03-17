@@ -225,6 +225,8 @@ class ContactRequestParser:
         fname = contact_json[Contact.fname.name]
         mname = contact_json[Contact.mname.name]
         lname = contact_json[Contact.lname.name]
+        if not mname:
+            mname = None
         self.parsed_contact = Contact(fname=fname, mname=mname, lname=lname)
         if self.contact_id != 0:
             self.parsed_contact.contact_id = self.contact_id
@@ -258,8 +260,8 @@ class ContactRequestParser:
         for date_json in dates_json:
             date_id = date_json.get(Date.date_id.name, 0)
             date = date_json[Date.date.name]
-            if not re.match(r'\d{2}/\d{2}/\d{4}', date):
-                raise TypeError('Invalid date format. Expected mm/dd/yyyy')
+            if not re.match(r'\d{4}-\d{2}-\d{2}', date):
+                raise TypeError('Invalid date format. Expected yyyy-mm-dd')
             date_type = date_json[Date.date_type.name]
             date_obj = Date(date_type=date_type, contact_id=self.contact_id, date=date)
             if date_id != 0:
@@ -271,12 +273,12 @@ class ContactRequestParser:
             phone_id = phone_json.get(Phone.phone_id.name, 0)
             phone_type = phone_json[Phone.phone_type.name]
             area = phone_json[Phone.area.name]
-            if not isinstance(area, int):
+            if not isinstance(area, int) and not str.isnumeric(area):
                 raise TypeError('Area must be numeric')
             number = phone_json[Phone.number.name]
-            if not isinstance(number, int):
+            if not isinstance(number, int) and not str.isnumeric(number):
                 raise TypeError('Number must be numeric')
-            phone_obj = Phone(phone_type=phone_type, contact_id=self.contact_id, area=area, number=number)
+            phone_obj = Phone(phone_type=phone_type, contact_id=self.contact_id, area=int(area), number=int(number))
             if phone_id != 0:
                 phone_obj.phone_id = phone_id
             self.phones.append(phone_obj)

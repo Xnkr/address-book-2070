@@ -19,20 +19,21 @@ export default class Browse extends React.Component {
 
     SearchBar = () => {
         return (
-            <div className="input-group mb-3 search-col">
-                <div className="input-group-prepend">
-                    <button className="btn btn-success " type="button" onClick={() => this.props.addFn()}>
-                        <FontAwesomeIcon icon={faPlus} size="lg" />
-                    </button>
+            <form id="search-form" onSubmit={(e) => this.props.searchFn(this.state.searchQuery, e)}>
+                <div className="input-group mb-3 search-col">
+                    <div className="input-group-prepend">
+                        <button className="btn btn-success " type="button" onClick={() => this.props.addFn()}>
+                            <FontAwesomeIcon icon={faPlus} size="lg"/>
+                        </button>
+                    </div>
+                    <input type="text" className="form-control" placeholder="Search"
+                           aria-label="Search" onChange={this.updateQuery}/>
+                    <div className="input-group-append">
+                        <button className="btn btn-primary" type="submit">Search
+                        </button>
+                    </div>
                 </div>
-                <input type="text" className="form-control" placeholder="Search"
-                       aria-label="Search" onChange={this.updateQuery}/>
-                <div className="input-group-append">
-                    <button className="btn btn-primary" type="button"
-                            onClick={() => this.props.searchFn(this.state.searchQuery)}>Search
-                    </button>
-                </div>
-            </div>
+            </form>
         )
     };
 
@@ -66,7 +67,7 @@ export default class Browse extends React.Component {
                         <thead>
                         <tr>
                             <th>
-                                <this.SearchBar />
+                                <this.SearchBar/>
                             </th>
                         </tr>
                         </thead>

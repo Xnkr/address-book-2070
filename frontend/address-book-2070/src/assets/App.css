@@ -122,20 +122,21 @@ ol, li {
     transform: translateX(-50%) translateY(-50%);
 }
 
-.add-field:hover {
+.add-field:hover, .remove-field:hover {
     color: blue;
     cursor: pointer;
 }
 
 .pad-15 {
     padding: 15px;
+    margin-bottom: 20px;
 }
 
 .detail-panel {
     overflow-y: scroll;
     min-height: 100%;
     padding-left: 10px;
-    max-height: 400px;
+    max-height: 300px;
 }
 
 .contact-name-lg {
@@ -154,4 +155,19 @@ ol, li {
 
 .form-control-plaintext {
     font-weight: bold;
+}
+
+
+.remove-field {
+    color: red;
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    -moz-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
+
+
+.hide {
+    display: none;
 }

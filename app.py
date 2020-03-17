@@ -32,6 +32,7 @@ def contact_json_validator(json):
     """
     required_fields = ("fname", "mname", "lname", "addresses", "phones", "dates")
     if not all(required_field in json for required_field in required_fields):
+        logger.error("Unknown JSON structure. Required field(s) missing {}".format(json))
         abort(StandardResponses.BAD_REQUEST_CODE,
               message="Unknown JSON structure. Required field(s) missing {}".format(required_fields))
 

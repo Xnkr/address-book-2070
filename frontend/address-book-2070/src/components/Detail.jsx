@@ -10,11 +10,11 @@ export default class Detail extends React.Component {
     renderButton = (isView, contact_id) => {
         if (isView) {
             return (
-                <button className="btn btn-success" type="button" onClick={() => this.props.editFn(contact_id)}>&nbsp;Edit&nbsp;</button>
+                <button className="btn btn-success mr-2" type="button" onClick={() => this.props.editFn(contact_id)}>&nbsp;Edit&nbsp;</button>
             )
         } else {
             return (
-                <button className="btn btn-success" type="button" onClick={() => this.props.saveFn(contact_id)}>&nbsp;Save&nbsp;</button>
+                <button className="btn btn-success mr-2" type="submit" form="contact-form">&nbsp;Save&nbsp;</button>
             )
         }
     };
@@ -28,28 +28,38 @@ export default class Detail extends React.Component {
                 </div>
             );
         }
-        const isView = !this.props.isEdit;
-        const showOrHide = this.props.isEdit ? 'show' : 'hide';
-        const formClass = this.props.isEdit ? 'form-control' : 'form-control-plaintext';
+        const isEdit = this.props.isEdit;
+        const isAdd = this.props.isAdd;
+        const isView = !(isEdit || isAdd);
+        const showOrHide = isView ? 'hide': 'show';
+        const formClass = (isView) ? 'form-control-plaintext': 'form-control';
         const addresses = contact.addresses.map((address, id) => {
             let addressTypeId = 'addressType' + address.address_id;
             let streetId = 'street' + address.address_id;
             let cityId = 'city' + address.address_id;
             let stateId = 'state' + address.state_id;
             let zipId = 'zip' + address.address_id;
+            let addShowHide = !isView && id === contact.addresses.length - 1 ? 'show': 'hide';
+            let removeShowHide = !isView && id !== contact.addresses.length - 1 ? 'show': 'hide';
             return (
                 <div key={id}>
                     <div className="form-row">
                         <div className="col-md-5 mb-3">
                             <label htmlFor={addressTypeId}>Address Type</label>
                             <input type="text" className={formClass} id={addressTypeId}
-                                   placeholder="Work" value={address.address_type} readOnly={isView} required/>
+                                   placeholder="Work" value={address.address_type} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('addresses', id, 'address_type', e)}
+                                   required/>
 
                         </div>
                         <div className="col-md-7 mb-3">
                             <label htmlFor={streetId}>Street</label>
                             <input type="text" className={formClass} id={streetId}
-                                   placeholder="Street" value={address.address} readOnly={isView} required/>
+                                   placeholder="Street" value={address.address} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('addresses', id, 'address', e)}
+                                   required/>
 
                         </div>
                     </div>
@@ -58,24 +68,36 @@ export default class Detail extends React.Component {
                         <div className="col-md-6 mb-3">
                             <label htmlFor={cityId}>City</label>
                             <input type="text" className={formClass} id={cityId}
-                                   placeholder="City" value={address.city} readOnly={isView} required/>
+                                   placeholder="City" value={address.city} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('addresses', id, 'city', e)}
+                                   required/>
 
                         </div>
                         <div className="col-md-3 mb-3">
                             <label htmlFor={stateId}>State</label>
                             <input type="text" className={formClass} id={stateId}
-                                   placeholder="State" value={address.state} readOnly={isView} required/>
+                                   placeholder="State" value={address.state} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('addresses', id, 'state', e)}
+                                   required/>
                         </div>
                         <div className="col-md-2 mb-3">
                             <label htmlFor={zipId}>Zip</label>
                             <input type="text" className={formClass} id={zipId}
-                                   placeholder="Zip" value={address.zip} readOnly={isView} required/>
+                                   placeholder="Zip" value={address.zip} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('addresses', id, 'zip', e)}
+                                   required/>
 
                         </div>
                         <div className="col-md-1">
-                              <span className={`add-field ${showOrHide}`}>
+                            <span className={`add-field ${addShowHide}`}>
                                 <FontAwesomeIcon icon={faPlus} size="lg"/>
-                              </span>
+                            </span>
+                            <span className={`remove-field ${removeShowHide}`}>
+                                <FontAwesomeIcon icon={faMinus} size="lg"/>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -85,6 +107,8 @@ export default class Detail extends React.Component {
             let phoneTypeId = 'phoneType' + phone.phone_id;
             let areaCodeId = 'areaCode' + phone.phone_id;
             let numberId = 'number' + phone.phone_id;
+            let addShowHide = !isView && id === contact.phones.length - 1 ? 'show': 'hide';
+            let removeShowHide = !isView && id !== contact.phones.length - 1 ? 'show': 'hide';
             return (
                 <div key={id}>
                     <div className="form-row">
@@ -92,23 +116,35 @@ export default class Detail extends React.Component {
                         <div className="col-md-5 mb-3">
                             <label htmlFor={phoneTypeId}>Phone Type</label>
                             <input type="text" className={formClass} id={phoneTypeId}
-                                   placeholder="Home" value={phone.phone_type} readOnly={isView} required/>
+                                   placeholder="Home" value={phone.phone_type} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('phones', id, 'phone_type', e)}
+                                   required/>
 
                         </div>
                         <div className="col-md-2 mb-3">
                             <label htmlFor={areaCodeId}>Area Code</label>
-                            <input type="text" className={formClass} id={areaCodeId}
-                                   placeholder="469" value={phone.area} readOnly={isView} required/>
+                            <input type="number" className={formClass} id={areaCodeId}
+                                   placeholder="469" value={phone.area} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('phones', id, 'area', e)}
+                                   required/>
                         </div>
                         <div className="col-md-4 mb-3">
                             <label htmlFor={numberId}>Phone</label>
-                            <input type="text" className={formClass} id={numberId}
-                                   placeholder="987-9033" value={phone.number} readOnly={isView} required/>
+                            <input type="number" className={formClass} id={numberId}
+                                   placeholder="987-9033" value={phone.number} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('phones', id, 'number', e)}
+                                   required/>
                         </div>
                         <div className="col-md-1">
-                          <span className={`add-field ${showOrHide}`}>
-                            <FontAwesomeIcon icon={faPlus} size="lg"/>
-                          </span>
+                            <span className={`add-field ${addShowHide}`}>
+                                <FontAwesomeIcon icon={faPlus} size="lg"/>
+                            </span>
+                            <span className={`remove-field ${removeShowHide}`}>
+                                <FontAwesomeIcon icon={faMinus} size="lg"/>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -118,24 +154,34 @@ export default class Detail extends React.Component {
         const dates = contact.dates.map((date, id) => {
             let dateTypeId = 'dateType' + date.date_id;
             let dateId = 'date' + date.date_id;
-            let dateVal = new Date(date.date).toISOString().slice(0,10);
+            let dateVal = date.date !== '' ? new Date(date.date).toISOString().slice(0,10) : '';
+            let addShowHide = !isView && id === contact.dates.length - 1 ? 'show': 'hide';
+            let removeShowHide = !isView && id !== contact.dates.length - 1 ? 'show': 'hide';
             return (
                 <div key={id}>
                     <div className="form-row">
                         <div className="col-md-5 mb-3">
                             <label htmlFor={dateTypeId}>Date Type</label>
                             <input type="text" className={formClass} id={dateTypeId}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('dates', id, 'date_type', e)}
                                    placeholder="Birthday" value={date.date_type} readOnly={isView} required/>
 
                         </div>
                         <div className="col-md-6 mb-3">
                             <label htmlFor="validationCustom04">Date</label>
                             <input type="date" className={formClass} id={dateId}
-                                   placeholder="2019-09-09" value={dateVal} readOnly={isView} required/>
+                                   placeholder="2019-09-09" value={dateVal} readOnly={isView}
+                                   onChange={(e) =>
+                                       this.props.handleFormDetailChange('dates', id, 'date', e)}
+                                   required/>
                         </div>
                         <div className="col-md-1">
-                            <span className={`add-field ${showOrHide}`}>
+                            <span className={`add-field ${addShowHide}`}>
                                 <FontAwesomeIcon icon={faPlus} size="lg"/>
+                            </span>
+                            <span className={`remove-field ${removeShowHide}`}>
+                                <FontAwesomeIcon icon={faMinus} size="lg"/>
                             </span>
                         </div>
                     </div>
@@ -145,29 +191,32 @@ export default class Detail extends React.Component {
 
         return (
             <div className="col pad-15">
-                <div id="style-1 detail-panel">
+                <div id="style-1" className="detail-panel">
                     <div className="h3 row contact-name-lg">
-                        <p className="col-md-8">{contact.fname} {contact.lname}</p>
+                        { isAdd && <p className="col-md-8">Add Contact</p>}
+                        { !isAdd && <p className="col-md-8">{contact.fname} {contact.lname}</p>}
                         <div className="contact-action col-md-4">
                             {this.renderButton(isView, contact_id)}
-                            <button className="btn btn-danger" type="button">Delete</button>
+                            <button className="btn btn-danger" type="button" onClick={() => this.props.deleteFn(contact_id)}>Delete</button>
                         </div>
                     </div>
                     <div className="contact-detail-form">
-                        <form>
+                        <form id="contact-form" onSubmit={this.props.saveFn}>
                             <div className="form-row">
                                 <div className="col-md-4 mb-3">
                                     <label htmlFor="fname">First name</label>
                                     <input type="text" className={formClass} id="fname"
                                            placeholder="First name" value={contact.fname}
                                            required
+                                           onChange={(e) => this.props.handleFormChange('fname', e)}
                                            readOnly={isView}
                                     />
                                 </div>
                                 <div className="col-md-4 mb-3">
                                     <label htmlFor="mname">Middle name</label>
                                     <input type="text" className={formClass} id="mname"
-                                           placeholder="Middle name" value={contact.mname === null ? ' ' : contact.mname}
+                                           placeholder="Middle name" value={contact.mname === null ? (isView ? ' ': '') : contact.mname}
+                                           onChange={(e) => this.props.handleFormChange('mname', e)}
                                            readOnly={isView}
                                     />
                                 </div>
@@ -176,6 +225,7 @@ export default class Detail extends React.Component {
                                     <input type="text" className={formClass} id="lname"
                                            placeholder="Last name" value={contact.lname}
                                            required
+                                           onChange={(e) => this.props.handleFormChange('lname', e)}
                                            readOnly={isView}
                                     />
                                 </div>

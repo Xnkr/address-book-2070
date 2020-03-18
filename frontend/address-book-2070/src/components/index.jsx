@@ -4,6 +4,10 @@ import Browse from "./Browse";
 import axios from "axios";
 import Detail from "./Detail";
 import Contact from "./Templates";
+import Loader from "react-loader";
+import config from "../config";
+
+const {baseURL} = config;
 
 class App extends React.Component {
     constructor(props) {
@@ -13,7 +17,8 @@ class App extends React.Component {
             contacts: [],
             selectedContact: {},
             isEdit: false,
-            isAdd: false
+            isAdd: false,
+            isLoaded: true
         };
         this.fetchContacts = this.fetchContacts.bind(this);
         this.fetchContactDetails = this.fetchContactDetails.bind(this);
@@ -30,40 +35,60 @@ class App extends React.Component {
     }
 
     fetchContacts(contact_id) {
-        //TODO: Infinite Scroll
-        axios.get('http://localhost:5000/contacts?fmt=minimal')
-            .then(
-                res => {
-                    const contacts = res.data;
-                    this.setState({
-                        contacts: contacts
-                    });
-                    this.fetchContactDetails(contact_id === undefined ? this.state.contacts[0].contact_id : contact_id, false);
-                }
-            ).catch(
+        this.setState({
+            isLoaded: false
+        }, () => {
+            axios.get(`${baseURL}/contacts?fmt=minimal`)
+                .then(
+                    res => {
+                        const contacts = res.data;
+                        this.setState({
+                            contacts: contacts
+                        });
+                        this.fetchContactDetails(contact_id === undefined ? this.state.contacts[0].contact_id : contact_id, false);
+                    }
+                ).catch(
                 err => {
                     alert(err);
                 }
-        );
+            ).finally(
+                () => {
+                    this.setState({
+                        isLoaded: true
+                    })
+                }
+            )
+        })
     }
 
     fetchContactDetails(contactId, isEdit) {
-        axios.get(`http://localhost:5000/contacts/${contactId}`)
-            .then(
-                res => {
-                    const contactDetail = res.data;
-                    this.setState({
-                        selectedContactId: contactDetail.contact_id,
-                        selectedContact: contactDetail,
-                        isEdit: isEdit,
-                        isAdd: false
-                    })
-                }
-            ).catch(
+        this.setState({
+            isLoaded: false
+        }, () => {
+            axios.get(`${baseURL}/contacts/${contactId}`)
+                .then(
+                    res => {
+                        const contactDetail = res.data;
+                        this.setState({
+                            selectedContactId: contactDetail.contact_id,
+                            selectedContact: contactDetail,
+                            isEdit: isEdit,
+                            isAdd: false
+                        })
+                    }
+                ).catch(
                 err => {
                     alert(err.response.data.message);
                 }
-        )
+            ).finally(
+                () => {
+                    this.setState({
+                        isLoaded: true
+                    })
+                }
+            )
+        })
+
     }
 
     componentDidMount() {
@@ -75,16 +100,20 @@ class App extends React.Component {
     }
 
     handleDelete(contactId) {
-        axios.delete(`http://localhost:5000/contacts/${contactId}`)
-            .then(
-                res => {
-                    this.fetchContacts();
-                }
-            ).catch(
+        this.setState({
+            isLoaded: false
+        }, () => {
+            axios.delete(`${baseURL}/contacts/${contactId}`)
+                .then(
+                    res => {
+                        this.fetchContacts();
+                    }
+                ).catch(
                 err => {
                     alert(err.response.data.message);
                 }
-        )
+            )
+        });
     }
 
     handleView(contactId) {
@@ -93,17 +122,29 @@ class App extends React.Component {
 
     handleSearch(query, e) {
         e.preventDefault();
-        axios.get(`http://localhost:5000/contacts?q=${query}&fmt=minimal`)
-            .then(
-                res => {
-                    const searchResults = res.data;
-                    this.setState({
-                        isSearch: true,
-                        searchQuery: query,
-                        contacts: searchResults
-                    })
-                }
-            )
+        this.setState({
+            isLoaded: false
+        }, () => {
+            axios.get(`${baseURL}/contacts?q=${query}&fmt=minimal`)
+                .then(
+                    res => {
+                        const searchResults = res.data;
+                        this.setState({
+                            isSearch: true,
+                            searchQuery: query,
+                            contacts: searchResults
+                        })
+                    }
+                ).catch(
+                    err => {
+                        alert(err)
+                    }
+            ).finally(() => {
+                this.setState({
+                    isLoaded: true
+                })
+            })
+        })
     }
 
     handleAdd() {
@@ -118,28 +159,42 @@ class App extends React.Component {
         e.preventDefault();
         const contact = this.state.selectedContact;
         const contactId = this.state.selectedContactId;
-        if (this.state.isAdd) {
-            axios.post('http://localhost:5000/contacts', contact).then(
-                res => {
-                    this.fetchContacts(res.data.contact_id);
-                }
-            ).catch(
-                err => {
-                    alert(err.response.data.message);
-                }
-            )
-        } else if (this.state.isEdit) {
-            axios.put(`http://localhost:5000/contacts/${contactId}`, contact)
-                .then(
+        this.setState({
+            isLoaded: false
+        }, () => {
+            if (this.state.isAdd) {
+                axios.post(`${baseURL}/contacts`, contact).then(
                     res => {
-                        this.fetchContacts(contactId);
+                        this.fetchContacts(res.data.contact_id);
                     }
                 ).catch(
                     err => {
                         alert(err.response.data.message);
                     }
-            )
-        }
+                ).finally(
+                    () => {
+                        this.setState({
+                            isLoaded: true
+                        })
+                    }
+                )
+            } else if (this.state.isEdit) {
+                axios.put(`${baseURL}/contacts/${contactId}`, contact)
+                    .then(
+                        res => {
+                            this.fetchContacts(contactId);
+                        }
+                    ).catch(
+                    err => {
+                        alert(err.response.data.message);
+                    }
+                ).finally(() => {
+                    this.setState({
+                        isLoaded: true
+                    })
+                })
+            }
+        })
     }
 
     handleFormChange(formField, e) {
@@ -185,30 +240,31 @@ class App extends React.Component {
                         <h1 className="header">AddressBook 2070</h1>
                     </div>
                 </div>
-                <div className="container main-app">
-                    <div className="row fill-height">
-                        <Browse searchFn={(query, e) => this.handleSearch(query, e)}
-                                contacts={this.state.contacts}
-                                deleteFn={(contactId) => this.handleDelete(contactId)}
-                                editFn={(contactId) => this.handleEdit(contactId)}
-                                viewFn={(contactId) => this.handleView(contactId)}
-                                addFn={() => this.handleAdd()}
-                        />
-                        <Detail contact={selectedContact}
-                                isAdd={this.state.isAdd}
-                                isEdit={this.state.isEdit}
-                                editFn={(contactId) => this.handleEdit(contactId)}
-                                deleteFn={(contactId) => this.handleDelete(contactId)}
-                                saveFn={(e) => this.handleSave(e)}
-                                handleFormChange={(formField, e) => this.handleFormChange(formField, e)}
-                                handleFormDetailChange={(detail, id, formField, e) =>
-                                    this.handleFormDetailChange(detail, id, formField, e)}
-                                addField={(field) => this.addField(field)}
-                                removeField={(field, id) => this.removeField(field, id)}
-                                cancelFn={(contact_id => this.handleView(contact_id))}
-                        />
+                <Loader loaded={this.state.isLoaded} />
+                    <div className="container main-app">
+                        <div className="row fill-height">
+                            <Browse searchFn={(query, e) => this.handleSearch(query, e)}
+                                    contacts={this.state.contacts}
+                                    deleteFn={(contactId) => this.handleDelete(contactId)}
+                                    editFn={(contactId) => this.handleEdit(contactId)}
+                                    viewFn={(contactId) => this.handleView(contactId)}
+                                    addFn={() => this.handleAdd()}
+                            />
+                            <Detail contact={selectedContact}
+                                    isAdd={this.state.isAdd}
+                                    isEdit={this.state.isEdit}
+                                    editFn={(contactId) => this.handleEdit(contactId)}
+                                    deleteFn={(contactId) => this.handleDelete(contactId)}
+                                    saveFn={(e) => this.handleSave(e)}
+                                    handleFormChange={(formField, e) => this.handleFormChange(formField, e)}
+                                    handleFormDetailChange={(detail, id, formField, e) =>
+                                        this.handleFormDetailChange(detail, id, formField, e)}
+                                    addField={(field) => this.addField(field)}
+                                    removeField={(field, id) => this.removeField(field, id)}
+                                    cancelFn={(contact_id => this.handleView(contact_id))}
+                            />
+                        </div>
                     </div>
-                </div>
             </div>
         );
     }

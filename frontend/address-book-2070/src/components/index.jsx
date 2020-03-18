@@ -65,6 +65,9 @@ class App extends React.Component {
         this.setState({
             isLoaded: false
         }, () => {
+            if (contactId === 0) {
+                contactId = this.state.contacts[0].contact_id;
+            }
             axios.get(`${baseURL}/contacts/${contactId}`)
                 .then(
                     res => {

@@ -7,12 +7,16 @@ export default class Browse extends React.Component {
 
     render() {
         const contacts = this.props.contacts.map((contact, id) => {
-            const mName = contact.mname === null ? '' : contact.mname.charAt(0) + '.';
+            const mName = contact.mname === null ? '' : contact.mname;
+            let fullName = `${contact.fname} ${mName} ${contact.lname}`;
+            if (fullName.length >= 41){
+                fullName = fullName.slice(0, 39) + '...';
+            }
             return (
                 <li className="list-item" key={contact.contact_id}>
                     <div className="row">
                         <div className="col-md-10 contact-select" onClick={() => this.props.viewFn(contact.contact_id)}>
-                            {contact.fname} {mName} {contact.lname}
+                            {fullName}
                         </div>
                         <div className="col-md-2">
                             <div className="list-action">

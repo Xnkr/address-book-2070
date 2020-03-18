@@ -132,7 +132,10 @@ export default class Detail extends React.Component {
                                    placeholder="469" value={phone.area} readOnly={isView}
                                    onChange={(e) =>
                                        this.props.handleFormDetailChange('phones', id, 'area', e)}
-                                   required/>
+                                   required
+                                   max="999"
+                                   min="100"
+                            />
                         </div>
                         <div className="col-md-4 mb-3">
                             <label htmlFor={numberId}>Phone</label>

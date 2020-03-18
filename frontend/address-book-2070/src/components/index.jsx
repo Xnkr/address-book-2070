@@ -18,7 +18,8 @@ class App extends React.Component {
             selectedContact: {},
             isEdit: false,
             isAdd: false,
-            isLoaded: true
+            isLoaded: true,
+            isSearch: false
         };
         this.fetchContacts = this.fetchContacts.bind(this);
         this.fetchContactDetails = this.fetchContactDetails.bind(this);
@@ -43,7 +44,8 @@ class App extends React.Component {
                     res => {
                         const contacts = res.data;
                         this.setState({
-                            contacts: contacts
+                            contacts: contacts,
+                            isSearch: false
                         });
                         this.fetchContactDetails(contact_id === undefined ? this.state.contacts[0].contact_id : contact_id, false);
                     }
@@ -244,7 +246,7 @@ class App extends React.Component {
                     </div>
                 </div>
                 <Loader loaded={this.state.isLoaded} />
-                    <div className="container main-app">
+                    <div className="container-fluid main-app">
                         <div className="row fill-height">
                             <Browse searchFn={(query, e) => this.handleSearch(query, e)}
                                     contacts={this.state.contacts}
@@ -252,6 +254,7 @@ class App extends React.Component {
                                     editFn={(contactId) => this.handleEdit(contactId)}
                                     viewFn={(contactId) => this.handleView(contactId)}
                                     addFn={() => this.handleAdd()}
+                                    isSearch={this.state.isSearch}
                             />
                             <Detail contact={selectedContact}
                                     isAdd={this.state.isAdd}

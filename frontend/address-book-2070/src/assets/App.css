@@ -27,6 +27,7 @@ body {
 
 .main-app {
     border-radius: 5px;
+    width: 95%;
     height: 75vh;
     margin-bottom: 10vh;
     box-shadow: 0 0 6px rgba(0, 0, 0, 1);
@@ -49,7 +50,7 @@ th {
 .contact-list {
     overflow-y: scroll;
     overflow-x: scroll;
-    max-height: 400px;
+    max-height: 470px;
     border-radius: 5px;
 }
 

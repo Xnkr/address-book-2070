@@ -9,8 +9,8 @@ export default class Browse extends React.Component {
         const contacts = this.props.contacts.map((contact, id) => {
             const mName = contact.mname === null ? '' : contact.mname;
             let fullName = `${contact.fname} ${mName} ${contact.lname}`;
-            if (fullName.length >= 41){
-                fullName = fullName.slice(0, 39) + '...';
+            if (fullName.length >= 38){
+                fullName = fullName.slice(0, 35) + '...';
             }
             return (
                 <li className="list-item" key={contact.contact_id}>

@@ -1,8 +1,21 @@
 import React from "react";
 import {faMinus, faPlus} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import Contact from "./Templates";
 
 export default class Detail extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedContact: {}
+        };
+        this.handleFormChange = this.handleFormChange.bind(this);
+        this.handleFormDetailChange = this.handleFormDetailChange.bind(this);
+        this.addField = this.addField.bind(this);
+        this.removeField = this.removeField.bind(this);
+    }
+
 
     renderButton = (isView, contact_id) => {
         if (isView) {
@@ -22,8 +35,50 @@ export default class Detail extends React.Component {
         }
     };
 
+    handleFormChange(formField, e) {
+        const contact = JSON.parse(JSON.stringify(this.state.selectedContact));
+        contact[formField] = e.target.value;
+        this.setState({
+            selectedContact: contact
+        })
+    }
+
+    handleFormDetailChange(detail, id, formField, e) {
+        const contact = JSON.parse(JSON.stringify(this.state.selectedContact));
+        contact[detail][id][formField] = e.target.value;
+        this.setState({
+            selectedContact: contact
+        })
+    }
+
+    addField(field) {
+        const contact = JSON.parse(JSON.stringify(this.state.selectedContact));
+        contact[field].push(new Contact().getEmptyField(field));
+        this.setState({
+            selectedContact: contact
+        })
+    }
+
+    removeField(field, id) {
+        const contact = JSON.parse(JSON.stringify(this.state.selectedContact));
+        const contactField = contact[field].slice();
+        contactField.splice(id, 1);
+        contact[field] = contactField;
+        this.setState({
+            selectedContact: contact
+        })
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (Object.keys(prevState).length === 0 || this.props.contact.contact_id !== prevProps.contact.contact_id) {
+            this.setState({
+                selectedContact: this.props.contact
+            })
+        }
+    }
+
     render() {
-        const contact = this.props.contact;
+        const contact = this.state.selectedContact;
         const contact_id = contact.contact_id;
         if (contact_id === undefined){
             return (
@@ -51,7 +106,7 @@ export default class Detail extends React.Component {
                             <input type="text" className={formClass} id={addressTypeId}
                                    placeholder="Work" value={address.address_type} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('addresses', id, 'address_type', e)}
+                                       this.handleFormDetailChange('addresses', id, 'address_type', e)}
                                    required/>
 
                         </div>
@@ -60,7 +115,7 @@ export default class Detail extends React.Component {
                             <input type="text" className={formClass} id={streetId}
                                    placeholder="Street" value={address.address} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('addresses', id, 'address', e)}
+                                       this.handleFormDetailChange('addresses', id, 'address', e)}
                                    required/>
 
                         </div>
@@ -72,7 +127,7 @@ export default class Detail extends React.Component {
                             <input type="text" className={formClass} id={cityId}
                                    placeholder="City" value={address.city} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('addresses', id, 'city', e)}
+                                       this.handleFormDetailChange('addresses', id, 'city', e)}
                                    required/>
 
                         </div>
@@ -81,7 +136,7 @@ export default class Detail extends React.Component {
                             <input type="text" className={formClass} id={stateId}
                                    placeholder="State" value={address.state} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('addresses', id, 'state', e)}
+                                       this.handleFormDetailChange('addresses', id, 'state', e)}
                                    required/>
                         </div>
                         <div className="col-md-2 mb-3">
@@ -89,17 +144,17 @@ export default class Detail extends React.Component {
                             <input type="text" className={formClass} id={zipId}
                                    placeholder="Zip" value={address.zip} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('addresses', id, 'zip', e)}
+                                       this.handleFormDetailChange('addresses', id, 'zip', e)}
                                    required/>
 
                         </div>
                         <div className="col-md-1">
                             <span className={`add-field ${addShowHide}`}
-                                  onClick={() => this.props.addField('addresses')}>
+                                  onClick={() => this.addField('addresses')}>
                                 <FontAwesomeIcon icon={faPlus} size="lg"/>
                             </span>
                             <span className={`remove-field ${removeShowHide}`}
-                                  onClick={() => this.props.removeField('addresses', id)}>
+                                  onClick={() => this.removeField('addresses', id)}>
                                 <FontAwesomeIcon icon={faMinus} size="lg"/>
                             </span>
                         </div>
@@ -122,7 +177,7 @@ export default class Detail extends React.Component {
                             <input type="text" className={formClass} id={phoneTypeId}
                                    placeholder="Home" value={phone.phone_type} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('phones', id, 'phone_type', e)}
+                                       this.handleFormDetailChange('phones', id, 'phone_type', e)}
                                    required/>
 
                         </div>
@@ -131,7 +186,7 @@ export default class Detail extends React.Component {
                             <input type="number" className={formClass} id={areaCodeId}
                                    placeholder="469" value={phone.area} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('phones', id, 'area', e)}
+                                       this.handleFormDetailChange('phones', id, 'area', e)}
                                    required
                                    max="999"
                                    min="100"
@@ -142,16 +197,16 @@ export default class Detail extends React.Component {
                             <input type="number" className={formClass} id={numberId}
                                    placeholder="9879033" value={phone.number} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('phones', id, 'number', e)}
+                                       this.handleFormDetailChange('phones', id, 'number', e)}
                                    required/>
                         </div>
                         <div className="col-md-1">
                             <span className={`add-field ${addShowHide}`}
-                                  onClick={() => this.props.addField('phones')}>
+                                  onClick={() => this.addField('phones')}>
                                 <FontAwesomeIcon icon={faPlus} size="lg"/>
                             </span>
                             <span className={`remove-field ${removeShowHide}`}
-                                  onClick={() => this.props.removeField('phones', id)}>
+                                  onClick={() => this.removeField('phones', id)}>
                                 <FontAwesomeIcon icon={faMinus} size="lg"/>
                             </span>
                         </div>
@@ -173,7 +228,7 @@ export default class Detail extends React.Component {
                             <label htmlFor={dateTypeId}>Date Type</label>
                             <input type="text" className={formClass} id={dateTypeId}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('dates', id, 'date_type', e)}
+                                       this.handleFormDetailChange('dates', id, 'date_type', e)}
                                    placeholder="Birthday" value={date.date_type} readOnly={isView} required/>
 
                         </div>
@@ -182,16 +237,16 @@ export default class Detail extends React.Component {
                             <input type="date" className={formClass} id={dateId}
                                    value={dateVal} readOnly={isView}
                                    onChange={(e) =>
-                                       this.props.handleFormDetailChange('dates', id, 'date', e)}
+                                       this.handleFormDetailChange('dates', id, 'date', e)}
                                    required/>
                         </div>
                         <div className="col-md-1">
                             <span className={`add-field ${addShowHide}`}
-                                  onClick={() => this.props.addField('dates')}>
+                                  onClick={() => this.addField('dates')}>
                                 <FontAwesomeIcon icon={faPlus} size="lg"/>
                             </span>
                             <span className={`remove-field ${removeShowHide}`}
-                                  onClick={() => this.props.removeField('dates', id)}>
+                                  onClick={() => this.removeField('dates', id)}>
                                 <FontAwesomeIcon icon={faMinus} size="lg"/>
                             </span>
                         </div>
@@ -211,22 +266,23 @@ export default class Detail extends React.Component {
                         </div>
                     </div>
                     <div className="contact-detail-form">
-                        <form id="contact-form" onSubmit={this.props.saveFn}>
+                        <form id="contact-form" onSubmit={(e) => this.props.saveFn(this.state.selectedContact, e)}>
                             <div className="form-row">
                                 <div className="col-md-4 mb-3">
                                     <label htmlFor="fname">First name</label>
                                     <input type="text" className={formClass} id="fname"
                                            placeholder="First name" value={contact.fname}
                                            required
-                                           onChange={(e) => this.props.handleFormChange('fname', e)}
+                                           onChange={(e) => this.handleFormChange('fname', e)}
                                            readOnly={isView}
                                     />
                                 </div>
                                 <div className="col-md-4 mb-3">
                                     <label htmlFor="mname">Middle name</label>
                                     <input type="text" className={formClass} id="mname"
-                                           placeholder="Middle name" value={contact.mname === null ? (isView ? ' ': '') : contact.mname}
-                                           onChange={(e) => this.props.handleFormChange('mname', e)}
+                                           placeholder="Middle name"
+                                           value={contact.mname === null || contact.mname === '' ? (isView ? ' ': '') : contact.mname}
+                                           onChange={(e) => this.handleFormChange('mname', e)}
                                            readOnly={isView}
                                     />
                                 </div>
@@ -235,7 +291,7 @@ export default class Detail extends React.Component {
                                     <input type="text" className={formClass} id="lname"
                                            placeholder="Last name" value={contact.lname}
                                            required
-                                           onChange={(e) => this.props.handleFormChange('lname', e)}
+                                           onChange={(e) => this.handleFormChange('lname', e)}
                                            readOnly={isView}
                                     />
                                 </div>

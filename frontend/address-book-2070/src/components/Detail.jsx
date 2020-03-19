@@ -39,7 +39,7 @@ export default class Detail extends React.Component {
             let addressTypeId = 'addressType' + address.address_id;
             let streetId = 'street' + address.address_id;
             let cityId = 'city' + address.address_id;
-            let stateId = 'state' + address.state_id;
+            let stateId = 'state' + address.address_id;
             let zipId = 'zip' + address.address_id;
             let addShowHide = !isView && id === contact.addresses.length - 1 ? 'show': 'hide';
             let removeShowHide = !isView && contact.addresses.length !== 1 ? 'show': 'hide';

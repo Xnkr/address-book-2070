@@ -18,6 +18,14 @@ export default class SearchBar extends React.Component {
         });
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.isSearch !== this.props.isSearch && !this.props.isSearch){
+            this.setState({
+                searchQuery: ''
+            })
+        }
+    }
+
     render() {
         return (
             <form id="search-form" onSubmit={(e) => this.props.searchFn(this.state.searchQuery, e)}>
@@ -28,7 +36,7 @@ export default class SearchBar extends React.Component {
                         </button>
                     </div>
                     <input type="search" className="form-control" placeholder="Search"
-                           aria-label="Search" onChange={this.updateQuery}/>
+                           aria-label="Search" onChange={this.updateQuery} value={this.state.searchQuery}/>
                     <div className="input-group-append">
                         <button className="btn btn-primary" type="submit">Search
                         </button>

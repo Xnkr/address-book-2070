@@ -249,4 +249,4 @@ class ContactMgr:
 
 
 if __name__ == '__main__':
-    ContactMgr.process_bulk_import('DbProj.csv')
+    ContactMgr.process_bulk_import('data/mock-data.csv')

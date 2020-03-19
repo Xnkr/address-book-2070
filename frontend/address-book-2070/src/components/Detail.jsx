@@ -70,7 +70,10 @@ export default class Detail extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (Object.keys(prevState).length === 0 || this.props.contact.contact_id !== prevProps.contact.contact_id) {
+        if (Object.keys(prevState).length === 0 ||
+            this.props.contact.contact_id !== prevProps.contact.contact_id ||
+            this.props.isEdit !== prevProps.isEdit
+        ) {
             this.setState({
                 selectedContact: this.props.contact
             })
@@ -104,19 +107,19 @@ export default class Detail extends React.Component {
                         <div className="col-md-5 mb-3">
                             <label htmlFor={addressTypeId}>Address Type</label>
                             <input type="text" className={formClass} id={addressTypeId}
-                                   placeholder="Work" value={address.address_type} readOnly={isView}
+                                    value={address.address_type} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('addresses', id, 'address_type', e)}
-                                   required/>
+                                   />
 
                         </div>
                         <div className="col-md-7 mb-3">
                             <label htmlFor={streetId}>Street</label>
                             <input type="text" className={formClass} id={streetId}
-                                   placeholder="Street" value={address.address} readOnly={isView}
+                                    value={address.address} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('addresses', id, 'address', e)}
-                                   required/>
+                                   />
 
                         </div>
                     </div>
@@ -125,27 +128,27 @@ export default class Detail extends React.Component {
                         <div className="col-md-6 mb-3">
                             <label htmlFor={cityId}>City</label>
                             <input type="text" className={formClass} id={cityId}
-                                   placeholder="City" value={address.city} readOnly={isView}
+                                    value={address.city} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('addresses', id, 'city', e)}
-                                   required/>
+                                   />
 
                         </div>
                         <div className="col-md-3 mb-3">
                             <label htmlFor={stateId}>State</label>
                             <input type="text" className={formClass} id={stateId}
-                                   placeholder="State" value={address.state} readOnly={isView}
+                                    value={address.state} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('addresses', id, 'state', e)}
-                                   required/>
+                                   />
                         </div>
                         <div className="col-md-2 mb-3">
                             <label htmlFor={zipId}>Zip</label>
                             <input type="text" className={formClass} id={zipId}
-                                   placeholder="Zip" value={address.zip} readOnly={isView}
+                                    value={address.zip} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('addresses', id, 'zip', e)}
-                                   required/>
+                                   />
 
                         </div>
                         <div className="col-md-1">
@@ -175,19 +178,19 @@ export default class Detail extends React.Component {
                         <div className="col-md-5 mb-3">
                             <label htmlFor={phoneTypeId}>Phone Type</label>
                             <input type="text" className={formClass} id={phoneTypeId}
-                                   placeholder="Home" value={phone.phone_type} readOnly={isView}
+                                    value={phone.phone_type} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('phones', id, 'phone_type', e)}
-                                   required/>
+                                   />
 
                         </div>
                         <div className="col-md-2 mb-3">
                             <label htmlFor={areaCodeId}>Area Code</label>
                             <input type="number" className={formClass} id={areaCodeId}
-                                   placeholder="469" value={phone.area} readOnly={isView}
+                                    value={phone.area} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('phones', id, 'area', e)}
-                                   required
+
                                    max="999"
                                    min="100"
                             />
@@ -195,10 +198,10 @@ export default class Detail extends React.Component {
                         <div className="col-md-4 mb-3">
                             <label htmlFor={numberId}>Phone</label>
                             <input type="number" className={formClass} id={numberId}
-                                   placeholder="9879033" value={phone.number} readOnly={isView}
+                                    value={phone.number} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('phones', id, 'number', e)}
-                                   required/>
+                                   />
                         </div>
                         <div className="col-md-1">
                             <span className={`add-field ${addShowHide}`}
@@ -229,7 +232,7 @@ export default class Detail extends React.Component {
                             <input type="text" className={formClass} id={dateTypeId}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('dates', id, 'date_type', e)}
-                                   placeholder="Birthday" value={date.date_type} readOnly={isView} required/>
+                                    value={date.date_type} readOnly={isView} />
 
                         </div>
                         <div className="col-md-6 mb-3">
@@ -238,7 +241,7 @@ export default class Detail extends React.Component {
                                    value={dateVal} readOnly={isView}
                                    onChange={(e) =>
                                        this.handleFormDetailChange('dates', id, 'date', e)}
-                                   required/>
+                                   />
                         </div>
                         <div className="col-md-1">
                             <span className={`add-field ${addShowHide}`}
@@ -271,7 +274,7 @@ export default class Detail extends React.Component {
                                 <div className="col-md-4 mb-3">
                                     <label htmlFor="fname">First name</label>
                                     <input type="text" className={formClass} id="fname"
-                                           placeholder="First name" value={contact.fname}
+                                            value={contact.fname}
                                            required
                                            onChange={(e) => this.handleFormChange('fname', e)}
                                            readOnly={isView}
@@ -280,7 +283,7 @@ export default class Detail extends React.Component {
                                 <div className="col-md-4 mb-3">
                                     <label htmlFor="mname">Middle name</label>
                                     <input type="text" className={formClass} id="mname"
-                                           placeholder="Middle name"
+                                           
                                            value={contact.mname === null || contact.mname === '' ? (isView ? ' ': '') : contact.mname}
                                            onChange={(e) => this.handleFormChange('mname', e)}
                                            readOnly={isView}
@@ -289,7 +292,7 @@ export default class Detail extends React.Component {
                                 <div className="col-md-4 mb-3">
                                     <label htmlFor="lname">Last name</label>
                                     <input type="text" className={formClass} id="lname"
-                                           placeholder="Last name" value={contact.lname}
+                                            value={contact.lname}
                                            required
                                            onChange={(e) => this.handleFormChange('lname', e)}
                                            readOnly={isView}

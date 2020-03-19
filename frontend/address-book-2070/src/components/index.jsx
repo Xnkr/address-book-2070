@@ -76,6 +76,17 @@ class App extends React.Component {
                 .then(
                     res => {
                         const contactDetail = res.data;
+                        if (isEdit) {
+                            if (contactDetail.addresses.length === 0) {
+                                contactDetail.addresses.push(new Contact().getEmptyField('addresses'));
+                            }
+                            if (contactDetail.phones.length === 0) {
+                                contactDetail.phones.push(new Contact().getEmptyField('phones'));
+                            }
+                            if (contactDetail.dates.length === 0) {
+                                contactDetail.dates.push(new Contact().getEmptyField('dates'));
+                            }
+                        }
                         this.setState({
                             selectedContactId: contactDetail.contact_id,
                             selectedContact: contactDetail,

@@ -250,6 +250,8 @@ class ContactRequestParser:
             city = address_json[Address.city.name]
             state = address_json[Address.state.name]
             zip = address_json[Address.zip.name]
+            if all_empty(address, city, state, zip):
+                return
             address_obj = Address(contact_id=self.contact_id, address=address,
                                   address_type=address_type, city=city, state=state, zip=zip)
             if address_id != 0:
@@ -260,9 +262,11 @@ class ContactRequestParser:
         for date_json in dates_json:
             date_id = date_json.get(Date.date_id.name, 0)
             date = date_json[Date.date.name]
-            if not re.match(r'\d{4}-\d{2}-\d{2}', date):
+            if date != '' and not re.match(r'\d{4}-\d{2}-\d{2}', date):
                 raise TypeError('Invalid date format. Expected yyyy-mm-dd')
             date_type = date_json[Date.date_type.name]
+            if all_empty(date):
+                return
             date_obj = Date(date_type=date_type, contact_id=self.contact_id, date=date)
             if date_id != 0:
                 date_obj.date_id = date_id
@@ -273,12 +277,21 @@ class ContactRequestParser:
             phone_id = phone_json.get(Phone.phone_id.name, 0)
             phone_type = phone_json[Phone.phone_type.name]
             area = phone_json[Phone.area.name]
+            number = phone_json[Phone.number.name]
+            if all_empty(area, number):
+                return
             if not isinstance(area, int) and not str.isnumeric(area):
                 raise TypeError('Area must be numeric')
-            number = phone_json[Phone.number.name]
             if not isinstance(number, int) and not str.isnumeric(number):
                 raise TypeError('Number must be numeric')
             phone_obj = Phone(phone_type=phone_type, contact_id=self.contact_id, area=int(area), number=int(number))
             if phone_id != 0:
                 phone_obj.phone_id = phone_id
             self.phones.append(phone_obj)
+
+
+def all_empty(*args):
+    for arg in args:
+        if not isinstance(arg, str) or arg != '':
+            return False
+    return True

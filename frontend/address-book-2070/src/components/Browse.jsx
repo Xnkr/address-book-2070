@@ -41,6 +41,7 @@ export default class Browse extends React.Component {
                             <th>
                                 <SearchBar addFn={this.props.addFn}
                                            searchFn={this.props.searchFn}
+                                           isSearch={this.props.isSearch}
                                 />
                             </th>
                         </tr>

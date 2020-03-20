@@ -1,13 +1,13 @@
 ## Address Book 2070
 
-#### Requirements
+### Requirements
 
 1. Python 3.6+
 2. NodeJS 12+ and npm 6.13+
 
-#### To build (or) run the application
+### To build (or) run the application
 
-#####1. Start the server
+#### 1. Start the server
 - *(Optional)* Create a python virtual environment
 - Install required python dependencies by running the command in the same directory as that of the application
 
@@ -24,7 +24,7 @@
 
 - Server will start in the default PORT 5000
 
-#####2. Start the UI
+#### 2. Start the UI
 - Install required npm dependencies by running the command in the `frontend/address-book-2070` directory
 
     `npm install` 

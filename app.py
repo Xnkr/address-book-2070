@@ -118,15 +118,6 @@ api.add_resource(ContactList, '/contacts')
 api.add_resource(Contact, '/contacts/<int:contact_id>')
 
 
-@app.route('/')
-def root():
-    """
-        Endpoint for launching frontend
-    """
-    path = os.path.join('.', 'frontend', 'public')
-    return send_from_directory(path, 'index.html')
-
-
 @app.route('/contacts/bulk_upload', methods=['POST'])
 def bulk_upload_csv():
     """

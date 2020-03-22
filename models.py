@@ -251,7 +251,7 @@ class ContactRequestParser:
             state = address_json[Address.state.name]
             zip = address_json[Address.zip.name]
             if all_empty(address, city, state, zip):
-                return
+                continue
             address_obj = Address(contact_id=self.contact_id, address=address,
                                   address_type=address_type, city=city, state=state, zip=zip)
             if address_id != 0:
@@ -266,7 +266,7 @@ class ContactRequestParser:
                 raise TypeError('Invalid date format. Expected yyyy-mm-dd')
             date_type = date_json[Date.date_type.name]
             if all_empty(date):
-                return
+                continue
             date_obj = Date(date_type=date_type, contact_id=self.contact_id, date=date)
             if date_id != 0:
                 date_obj.date_id = date_id
@@ -279,7 +279,7 @@ class ContactRequestParser:
             area = phone_json[Phone.area.name]
             number = phone_json[Phone.number.name]
             if all_empty(area, number):
-                return
+                continue
             if not isinstance(area, int) and not str.isnumeric(area):
                 raise TypeError('Area must be numeric')
             if not isinstance(number, int) and not str.isnumeric(number):
